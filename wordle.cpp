@@ -25,6 +25,11 @@ using namespace std;
 void genWords(string curr, string floating, int idx, 
               const set<string>& dict, set<string>& res);
 int dashes(string in, int idx);
+void expandIndex(const string& curr, const string& floating,
+                  size_t idx, size_t dashNum,
+                  const set<string>& dict,
+                  set<string>& res);
+bool inFloating(char c, const string& floating);
 
 
 
@@ -56,36 +61,48 @@ void genWords(string curr, string floating, int idx,
 
   //Base: no blanks left --> accept if all floats were used
   if(dashNum == 0){
-    if(floating.length() == 0 && dict.find(curr) != dict.end()) res.insert(curr);
+    if(floating.empty() && dict.find(curr) != dict.end()) res.insert(curr);
     return;
   }
 
-  //curr pos fixed --> move forward
+  expandIndex(curr, floating, idx, dashNum, dict, res);
+}
+
+void expandIndex(const string& curr, const string& floating,
+                  size_t idx, size_t dashNum,
+                  const set<string>& dict,
+                  set<string>& res)
+{
+
+  //#1 --> curr pos fixed --> move forward
   if(curr[idx] != '-'){
     genWords(curr, floating, idx+1, dict, res);
+    return;
   }
-  else{
-    //#1 --> try each float letter
-    for(size_t i = 0; i < floating.length(); i++){
-      char l = floating[i];
+  
+  //#2 --> try each float letter
+  for(size_t i = 0; i < floating.length(); i++){
+    char l = floating[i];
 
+    string next = curr;
+    next[idx] = l;
+
+    string new_float = floating;
+    new_float.erase(i, 1); //remove used floating l
+    genWords(next, new_float, idx + 1, dict, res);
+  }
+
+  //#3 --> try each reg letter
+  if(floating.length() < dashNum){
+    for(char l = 'a'; l <= 'z'; l++){
+
+      if(inFloating(l, floating)) continue;
       string next = curr;
       next[idx] = l;
-
-      string new_float = floating;
-      new_float.erase(i, 1); //remove used floating l
-      genWords(next, new_float, idx + 1, dict, res);
-    }
-
-    //#2 --> try each reg letter
-    if(floating.length() < dashNum){
-      for(char l = 'a'; l <= 'z'; l++){
-        string next = curr;
-        next[idx] = l;
-        genWords(next, floating, idx+1, dict, res);
-      }
+      genWords(next, floating, idx+1, dict, res);
     }
   }
+
 }
 
 //cnt of how many '-' chars left from idx
@@ -100,3 +117,6 @@ int dashes(string in, int idx)
   return count;
 }
 
+bool inFloating(char c, const string& floating){
+  return floating.find(c) != string::npos;
+}

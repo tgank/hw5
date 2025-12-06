@@ -60,6 +60,28 @@ bool schedule(
 
 }
 
+bool valid(const AvailabilityMatrix& avail, const DailySchedule& sched,
+            const vector<int>& worked, const size_t day,
+            const size_t maxShifts, const size_t worker)
+{
+    //available this day
+    if(!avail[day][worker]){
+        return 0;
+    }
+
+    //not exceeding max shifts
+    if((size_t)worked[worker] >= maxShifts){
+        return 0;
+    }
+
+    //check if not scheduled same day
+    if(find(sched[day].begin(), sched[day].end(), worker) != sched[day].end()){
+      return 0;
+    }
+
+    return 1;
+}
+
 bool fillSched(const AvailabilityMatrix& avail, size_t dailyNeed,
                 size_t day, size_t shift, DailySchedule& sched, 
                 vector<int>& worked, const size_t maxShifts)
@@ -94,27 +116,4 @@ bool fillSched(const AvailabilityMatrix& avail, size_t dailyNeed,
     }
     //no worker can fill shift
     return 0;
-}
-
-
-bool valid(const AvailabilityMatrix& avail, const DailySchedule& sched,
-            const vector<int>& worked, const size_t day,
-            const size_t maxShifts, const size_t worker)
-{
-    //available this day
-    if(!avail[day][worker]){
-        return 0;
-    }
-
-    //not exceeding max shifts
-    if((size_t)worked[worker] >= maxShifts){
-        return 0;
-    }
-
-    //check if not scheduled same day
-    if(find(sched[day].begin(), sched[day].end(), worker) != sched[day].end()){
-      return 0;
-    }
-
-    return 1;
 }
